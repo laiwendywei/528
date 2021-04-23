@@ -1,27 +1,8 @@
-from flask import Flask, render_template, request
 import shutil
+
 import cv2 as cv
 import numpy as np
 import pydicom
-import base64
-from PIL import Image
-import io
-
-# 在网页上输入dicom的时候，一定要连着directory都输完整...qwq 不然no file found
-app = Flask(__name__,static_folder='./static')
-
-@app.route("/", methods=['Get', 'POST'])
-def main():
-    return render_template('index.html')
-
-@app.route("/send_data", methods=['POST'])
-def dcm(image_data=None):
-    dcm = request.form['dcm']
-    output,instance = Dicom_to_Image(dcm)
-    instance = "dicom.jpg"
-    cv.imwrite(instance, output)
-    shutil.move('./' + instance, './static/' + instance)
-    return render_template("index.html", img_data="./static/dicom.jpg")
 
 def Dicom_to_Image(path):
     dcm = pydicom.read_file(path)
@@ -58,5 +39,13 @@ def Dicom_to_Image(path):
                 new[i][j] = int(((rescale_pix_val -Window_Min) / (Window_Max-Window_Min))*255)
     return new,instance
 
-if __name__ == '__main__':
-    app.run(debug=True)
+def main():
+    image = "./sample/006/CT.1.2.840.113619.2.55.3.51045121.848.1507151727.835.23-no-phi.dcm"
+    output, instance = Dicom_to_Image(image)
+    # instance_name = str(instance).zfill(3)+".jpg"
+    instance = "dicom.jpg"
+    cv.imwrite(instance, output)
+    shutil.move('./'+instance, './static/'+instance)
+
+if __name__ == "__main__":
+    main()
