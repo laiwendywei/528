@@ -1,4 +1,6 @@
+import Merge_Code
 from flask import Flask, render_template, request
+from flask_mysqldb import MySQL
 import shutil
 import cv2 as cv
 import numpy as np
@@ -6,11 +8,20 @@ import pydicom
 import base64
 from PIL import Image
 import io
+from threading import Thread
+from pydicom import dcmread
 
 # 在网页上输入dicom的时候，一定要连着directory都输完整...qwq 不然no file found
 app = Flask(__name__,static_folder='./static')
 
-@app.route("/", methods=['Get', 'POST'])
+#app.config['MYSQL_HOST'] = '127.0.0.1'
+#app.config['MYSQL_USER'] = 'root'
+#app.config['MYSQL_PASSWORD'] = ''
+#app.config['MYSQL_DB'] = 'BME'
+
+#mysql = MySQL(app)
+
+@app.route("/", methods=['GET', 'POST'])
 def main():
     return render_template('index.html')
 
@@ -21,7 +32,29 @@ def dcm(image_data=None):
     instance = "dicom.jpg"
     cv.imwrite(instance, output)
     shutil.move('./' + instance, './static/' + instance)
+    dc = dcmread(dcm)
+    if dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.3':
+        Merge_Code.struct_set(dc)
+        # print ('inserted structure set dicom')
+    elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.2':
+        Merge_Code.ct_image(dc)
+        # print('inserted ct dicom')
+    elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.2':
+        Merge_Code.RD_Dose(dc)
+        # print ('inserted dose dicom')
+    elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.5':
+        Merge_Code.RT(dc)
+    else:
+        print('Cannot find a parser.')
+
     return render_template("index.html", img_data="./static/dicom.jpg")
+
+'''
+@app.route('/run-script')
+def run_script():
+   result = subprocess.check_output(["python3", "Merge_Code.py"])
+   return render_template('index.html', **locals())
+   '''
 
 def Dicom_to_Image(path):
     dcm = pydicom.read_file(path)
