@@ -6,7 +6,11 @@ from pydicom import dcmread
 # username = input("User Name: ")
 # database = input("Which database: ")
 # cnx = mysql.connector.connect(user=str(username), host='127.0.0.1',
-#                               database=str(database), auth_plugin='mysql_native_password')
+#
+#                              database=str(database), auth_plugin='mysql_native_password')
+
+#def func(dc):
+#    print('send to database')
 
 cnx = mysql.connector.connect(user='root', host='127.0.0.1', database='BME')
 
@@ -368,23 +372,28 @@ def RT(dc):
     cursor.execute(st_query)
 
     cnx.commit()
+'''
+    import glob
 
-import glob
+    for dc_file in glob.glob('006/*.dcm'):
+        dc = dcmread(str(dc_file))
 
-for dc_file in glob.glob('006/*.dcm'):
-    dc = dcmread(str(dc_file))
-
-    if dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.3':
-        struct_set(dc)
-        # print ('inserted structure set dicom')
-    elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.2':
-        ct_image(dc)
-        # print('inserted ct dicom')
-    elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.2':
-        RD_Dose(dc)
-        # print ('inserted dose dicom')
-    elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.5':
-        RT(dc)
-    else:
-        print ('Cannot find a parser.')
-
+        if dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.3':
+            struct_set(dc)
+            # print ('inserted structure set dicom')
+        elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.2':
+            ct_image(dc)
+            # print('inserted ct dicom')
+        elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.2':
+            RD_Dose(dc)
+            # print ('inserted dose dicom')
+        elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.5':
+            RT(dc)
+        else:
+            print ('Cannot find a parser.')
+'''
+if __name__ == '__main__':
+    ct_image(dc)
+    RT(dc)
+    RD_Dose(dc)
+    struct_set(dc)
