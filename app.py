@@ -35,10 +35,8 @@ def dcm(image_data=None):
         return render_template("index.html")
     if dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.2':
         output, instance = Dicom_to_Image(dcm)
-        instance = "dicom.jpg"
         cv.imwrite(instance, output)
-        #os.remove('./static/' + instance)
-        shutil.move('./' + instance, './static/' + instance)
+        shutil.move(instance, './static/' + instance)
         Merge_Code.ct_image(dc)
         print('inserted ct dicom')
         print(output)
@@ -91,7 +89,7 @@ def Dicom_to_Image(path):
                 new[i][j] =0
             else:
                 new[i][j] = int(((rescale_pix_val -Window_Min) / (Window_Max-Window_Min))*255)
-    return new,instance
+    return new,str(instance) + '.jpg'
 
 if __name__ == '__main__':
     app.run(debug=True)
