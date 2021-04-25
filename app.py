@@ -31,23 +31,32 @@ def dcm(image_data=None):
     dc = dcmread(dcm)
     if dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.3':
         Merge_Code.struct_set(dc)
-        # print ('inserted structure set dicom')
-    elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.2':
+        print ('inserted structure set dicom')
+        return render_template("index.html")
+    if dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.2':
         output, instance = Dicom_to_Image(dcm)
         instance = "dicom.jpg"
         cv.imwrite(instance, output)
+        #os.remove('./static/' + instance)
         shutil.move('./' + instance, './static/' + instance)
         Merge_Code.ct_image(dc)
-        # print('inserted ct dicom')
+        print('inserted ct dicom')
+        print(output)
+        return render_template("index.html", img_data="./static/dicom.jpg")
+    elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.3':
+        Merge_Code.struct_set(dc)
+        print ('inserted structure set dicom')
+        return render_template("index.html")
     elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.2':
         Merge_Code.RD_Dose(dc)
-        # print ('inserted dose dicom')
+        print ('inserted dose dicom')
+        return render_template("index.html")
     elif dc.file_meta[0x0002, 0x0002].value == '1.2.840.10008.5.1.4.1.1.481.5':
         Merge_Code.RT(dc)
+        return render_template("index.html")
     else:
         print('Cannot find a parser.')
-    
-    return render_template("index.html", img_data="./static/dicom.jpg")
+        return render_template("index.html")
 
 def Dicom_to_Image(path):
     dcm = pydicom.read_file(path)
