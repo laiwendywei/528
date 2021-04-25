@@ -46,6 +46,8 @@ def dcm(image_data=None):
         Merge_Code.RT(dc)
     else:
         print('Cannot find a parser.')
+    
+    return render_template("index.html", img_data="./static/dicom.jpg")
 
 def Dicom_to_Image(path):
     dcm = pydicom.read_file(path)
